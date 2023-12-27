@@ -1,4 +1,4 @@
 Rails.application.routes.draw do
-  post '/games', to: 'games#create'
-  get '/games/:id', to: 'games#show', as: 'game'
+  resources :games, only: [:create, :show]
+  get '/games/:id/moves/:row/:column', to: 'games#moves'
 end
