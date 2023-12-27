@@ -36,22 +36,27 @@ class GamesController < ApplicationController
       return
     end
 
+    token = request.headers['Authorization']
+
     # Check if the provided token matches token_1 or token_2
-    if params[:token] != game.token_1 && params[:token] != game.token_2
+    unless [game.token_1, game.token_2].include?(token)
       render json: { error: 'Wrong token' }, status: :unauthorized
+      return
     end
 
     # If the token matches token_1, return board_state and game_status
-    if params[:token] == game.token_1
+    if token == game.token_1
       render json: { board_state: game.board_state, game_status: game.game_status }
+      return
     end
 
     # If the token matches token_2
-    if params[:token] == game.token_2
+    if token == game.token_2
       if game.game_status == 'Waiting for opponent'
         game.update(game_status: 'Player_1 turn')
       end
       render json: { board_state: game.board_state, game_status: game.game_status }
+      return
     end
   end
 end

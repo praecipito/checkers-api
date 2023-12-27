@@ -1,8 +1,4 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Defines the root path route ("/")
-  # root "articles#index"
   post '/games', to: 'games#create'
-  get '/games/:id/:token', to: 'games#show', as: 'game'
+  get '/games/:id', to: 'games#show', as: 'game'
 end
