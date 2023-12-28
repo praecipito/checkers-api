@@ -66,7 +66,7 @@ class GamesController < ApplicationController
     end
   end
 
-  def moves
+  def movements
     @game = Game.find_by(id: params[:id])
 
     # Check if the game exists
