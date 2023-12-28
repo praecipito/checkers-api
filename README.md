@@ -1,6 +1,6 @@
 # Checkers Game API
 
-This is a simple JSON REST API for playing checkers. The API allows two players to engage in a game of checkers.
+This is a simple JSON REST API for playing checkers using Ruby on Rails 7.0.8 and Rails 3.1.2. The API allows two players to engage in a game of checkers.
 
 ## Setup
 
@@ -24,9 +24,6 @@ This is a simple JSON REST API for playing checkers. The API allows two players 
   ```
   rails server
   ```
-
-- **Ruby version:**
-  3.1.2
 
 ## Endpoints
 
