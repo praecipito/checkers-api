@@ -41,8 +41,8 @@ This is a simple JSON REST API for playing checkers using Ruby on Rails 7.0.8 an
      - *Authorization Header:* Token (`token_1` for player_1 or `token_2` for player_2)
    - **Response:** Returns `board_state` and `game_status` for the specified game.
 
-3. **Show Possible Piece Moves**
-   - **Endpoint:** `GET /games/:id/moves/:row/:column`
+3. **Show Possible Piece Movements**
+   - **Endpoint:** `GET /games/:id/movements/:row/:column`
    - **Description:** Show possible moves to the specified piece.
    - **Parameters:**
      - `id`: Game ID
