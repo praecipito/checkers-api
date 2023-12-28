@@ -1,54 +1,64 @@
 # Checkers Game API
+
 This is a simple JSON REST API for playing checkers. The API allows two players to engage in a game of checkers.
 
-* Setup
-Clone the Repository:
-git clone <repository_url>
+## Setup
 
-* Installation:
-bundle install
+- **Clone the Repository:**
+  ```
+  git clone <repository_url>
+  ```
 
-* Database Setup:
-rails db:create
-rails db:migrate
+- **Installation:**
+  ```
+  bundle install
+  ```
 
-* Run the Server:
-rails server
+- **Database Setup:**
+  ```
+  rails db:create
+  rails db:migrate
+  ```
 
-* Ruby version:
-3.1.2
+- **Run the Server:**
+  ```
+  rails server
+  ```
 
-# Endpoints
+- **Ruby version:**
+  3.1.2
 
-* 1. Create a New Game
-Endpoint: POST /games
-Description: Creates a new checkers game.
-Parameters: None required.
-Response: Returns game_id, token_1, and token_2 for the new game.
+## Endpoints
 
-* 2. Show Game State
-Endpoint: GET /games/:id
-Description: Displays the game state for a given game ID.
-Parameters:
-id: Game ID
-Authorization Header: Token (token_1 for player_1 or token_2 for player_2)
-Response: Returns board_state and game_status for the specified game.
+1. **Create a New Game**
+   - **Endpoint:** `POST /games`
+   - **Description:** Creates a new checkers game.
+   - **Parameters:** None required.
+   - **Response:** Returns `game_id`, `token_1`, and `token_2` for the new game.
 
-* 3. Show Possible Piece Moves
-Endpoint: GET /games/:id/moves/:row/:column
-Description: Show possible moves to the specified piece.
-Parameters:
-id: Game ID
-row, column: Position of the piece
-Authorization Header: Token (token_1 for player_1 or token_2 for player_2)
-Response: Returns tile_requested and possible_moves to the specified piece.
+2. **Show Game State**
+   - **Endpoint:** `GET /games/:id`
+   - **Description:** Displays the game state for a given game ID.
+   - **Parameters:**
+     - `id`: Game ID
+     - *Authorization Header:* Token (`token_1` for player_1 or `token_2` for player_2)
+   - **Response:** Returns `board_state` and `game_status` for the specified game.
 
-* 4. Move Piece and Update Board
-Endpoint: PATCH /games/:id/move/:row/:column/to/:new_row/:new_column
-Description: Moves a piece on the board.
-Parameters:
-id: Game ID
-row, column: Initial position of the piece
-new_row, new_column: New position for the piece
-Authorization Header: Token (token_1 for player_1 or token_2 for player_2)
-Response: Provides details about the requested move.
+3. **Show Possible Piece Moves**
+   - **Endpoint:** `GET /games/:id/moves/:row/:column`
+   - **Description:** Show possible moves to the specified piece.
+   - **Parameters:**
+     - `id`: Game ID
+     - `row`, `column`: Position of the piece
+     - *Authorization Header:* Token (`token_1` for player_1 or `token_2` for player_2)
+   - **Response:** Returns `tile_requested` and `possible_moves` to the specified piece.
+
+4. **Move Piece and Update Board**
+   - **Endpoint:** `PATCH /games/:id/move/:row/:column/to/:new_row/:new_column`
+   - **Description:** Moves a piece on the board.
+   - **Parameters:**
+     - `id`: Game ID
+     - `row`, `column`: Initial position of the piece
+     - `new_row`, `new_column`: New position for the piece
+     - *Authorization Header:* Token (`token_1` for player_1 or `token_2` for player_2)
+   - **Response:** Provides details about the requested move.
