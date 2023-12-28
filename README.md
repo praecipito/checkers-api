@@ -50,7 +50,7 @@ This is a simple JSON REST API for playing checkers using Ruby on Rails 7.0.8 an
      - *Authorization Header:* Token (`token_1` for player_1 or `token_2` for player_2)
    - **Response:** Returns `tile_requested` and `possible_moves` to the specified piece.
 
-4. **Move Piece and Update Board**
+4. **Update Board Moving A Piece**
    - **Endpoint:** `PATCH /games/:id/move/:row/:column/to/:new_row/:new_column`
    - **Description:** Moves a piece on the board.
    - **Parameters:**
