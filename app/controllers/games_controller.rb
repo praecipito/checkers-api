@@ -25,7 +25,7 @@ class GamesController < ApplicationController
       player_2_pieces: 12
     )
 
-    render json: { game_id: @game.id, token_1: token_1, token_2: token_2 }
+    render json: { game_id: @game.id, token_1: @game.token_1, token_2: @game.token_2 }, status: :created
   end
 
   def show
@@ -41,7 +41,7 @@ class GamesController < ApplicationController
 
     # Check if the token was provided
     unless token
-      render json: { error: 'Token was not provided' }, status: :not_found
+      render json: { error: 'Token was not provided' }, status: :unauthorized
       return
     end
 
@@ -54,14 +54,14 @@ class GamesController < ApplicationController
     # If the token matches token_1, return board_state and game_status
     case token
     when @game.token_1
-      render json: { board_state: @game.board_state, game_status: @game.game_status, player_1_pieces: @game.player_1_pieces, player_2_pieces: @game.player_2_pieces }
+      render json: { board_state: @game.board_state, game_status: @game.game_status, player_1_pieces: @game.player_1_pieces, player_2_pieces: @game.player_2_pieces }, status: :ok
       return
     # If the token matches token_2
     when @game.token_2
       if @game.game_status == 'Waiting for opponent'
         @game.update(game_status: 'Player_1 turn')
       end
-      render json: { board_state: @game.board_state, game_status: @game.game_status, player_1_pieces: @game.player_1_pieces, player_2_pieces: @game.player_2_pieces }
+      render json: { board_state: @game.board_state, game_status: @game.game_status, player_1_pieces: @game.player_1_pieces, player_2_pieces: @game.player_2_pieces }, status: :ok
       return
     end
   end
