@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_12_27_193142) do
+ActiveRecord::Schema[7.0].define(version: 2023_12_28_144142) do
   create_table "games", force: :cascade do |t|
     t.text "board_state"
     t.string "game_status", default: "Waiting for opponent"
@@ -18,6 +18,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_12_27_193142) do
     t.string "token_2"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "player_1_pieces"
+    t.integer "player_2_pieces"
   end
 
 end
