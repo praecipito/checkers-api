@@ -9,14 +9,12 @@ RSpec.describe GamesController, type: :controller do
       expect(response.content_type).to include('application/json')
 
       json_response = JSON.parse(response.body)
-      expect(json_response).to have_key('game_id')
-      expect(json_response).to have_key('token_1')
-      expect(json_response).to have_key('token_2')
+      expect(json_response).to include('game_id', 'token_1', 'token_2')
     end
   end
 
   describe 'GET #show' do
-    let(:game) { create(:game, token_1: 'token1', token_2: 'token2', game_status: 'Waiting for opponent') }
+    let(:game) { create(:game) }
 
     context 'when token is not provided' do
       it 'returns status unauthorized' do
@@ -85,7 +83,7 @@ RSpec.describe GamesController, type: :controller do
   end
 
   describe 'GET #movements' do
-  let(:game) { create(:game, token_1: 'token1', token_2: 'token2', game_status: 'Player_1 turn') }
+  let(:game) { create(:game, game_status: 'Player_1 turn') }
 
     context 'when the game does not exist' do
       before { get :movements, params: { id: 'invalid_id', row: 0, column: 0 } }
@@ -178,6 +176,6 @@ RSpec.describe GamesController, type: :controller do
       end
     end
 
-    
+
   end
 end
