@@ -6,20 +6,14 @@ class GamesController < ApplicationController
 
     # Create initial board state (8x8 checkers board)
     initial_board_state = [
-      # [-1, 0, -1, 0, -1, 0, -1, 0],
-      # [0, -1, 0, -1, 0, -1, 0, -1],
-      # [-1, 0, -1, 0, -1, 0, -1, 0],
+      [-1, 0, -1, 0, -1, 0, -1, 0],
+      [0, -1, 0, -1, 0, -1, 0, -1],
+      [-1, 0, -1, 0, -1, 0, -1, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 1, 0, 11, 0, 0, 0],
-      [0, 0, 0, -11, 0, 0, 0, 0],
-      [0, 0, -1, 0, -11, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
-      # [0, 1, 0, 1, 0, 1, 0, 1],
-      # [1, 0, 1, 0, 1, 0, 1, 0],
-      # [0, 1, 0, 1, 0, 1, 0, 1]
+      [0, 1, 0, 1, 0, 1, 0, 1],
+      [1, 0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0, 1]
     ]
 
     # Create a new game instance with tokens and initial board state
@@ -28,8 +22,7 @@ class GamesController < ApplicationController
       token_2: token_2,
       board_state: initial_board_state,
       player_1_pieces: 12,
-      player_2_pieces: 12,
-      game_status: 'Player_2 turn'
+      player_2_pieces: 12
     )
 
     render json: { game_id: @game.id, token_1: @game.token_1, token_2: @game.token_2 }, status: :created
