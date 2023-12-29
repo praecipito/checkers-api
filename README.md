@@ -35,7 +35,7 @@ This is a simple JSON REST API for playing checkers using Ruby on Rails 7.0.8 an
 
 2. **Show Game State**
    - **Endpoint:** `GET /games/:id`
-   - **Description:** Displays the game state for a given game ID.
+   - **Description:** Displays the game state for a given game ID. The board_state is an array of 8 array, each one containing 8 elements. The integer 0 represents a vacant tile, 1 represents a tile occupied by a player_1 regular piece, 11 represents a tile occupied by a player_1 king piece, -1 represents a tile occupied by a player_2 regular piece and -11 represents a tile occupied by a player_2 king piece.
    - **Parameters:**
      - `id`: Game ID
      - *Authorization Header:* Token (`token_1` for player_1 or `token_2` for player_2)
