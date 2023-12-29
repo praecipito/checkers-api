@@ -79,7 +79,7 @@ class GamesController < ApplicationController
 
     # Check if the token was provided
     unless token
-      render json: { error: 'Token was not provided' }, status: :not_found
+      render json: { error: 'Token was not provided' }, status: :unauthorized
       return
     end
 
@@ -97,9 +97,6 @@ class GamesController < ApplicationController
 
     row = params[:row].to_i
     column = params[:column].to_i
-    board_state = JSON.parse(@game.board_state)
-    selected_tile = board_state[row][column]
-    possible_moves = []
 
     # Check if the tile exists
     unless row.between?(0, 7) && column.between?(0, 7)
@@ -107,17 +104,21 @@ class GamesController < ApplicationController
       return
     end
 
+    board_state = JSON.parse(@game.board_state)
+    possible_moves = []
+    selected_tile = board_state[row][column]
+
     # Check if it is the player's turn
     if (token == @game.token_1 && @game.game_status == 'Player_2 turn') || (token == @game.token_2 && @game.game_status == 'Player_1 turn')
       render json: { error: 'Not your turn' }, status: :bad_request
     elsif (token == @game.token_1 && @game.game_status == 'Player_1 turn') || (token == @game.token_2 && @game.game_status == 'Player_2 turn')
       # Check if the selected tile is empty
       if selected_tile == 0
-        render json: { error: 'Empty tile' }, status: :bad_request
+        render json: { error: 'Empty tile selected' }, status: :bad_request
       # Check if the piece belongs to the player
       elsif (@game.token_1 == token && selected_tile == -1) || (@game.token_2 == token && selected_tile == 1)
-        render json: { error: 'Not your piece' }, status: :bad_request
-      # Player_1 rules
+        render json: { error: "Opponent's piece selected" }, status: :bad_request
+      # Check if the piece belongs to the player and if there are possible moves for player 1
       elsif @game.token_1 == token && selected_tile == 1
         if row - 1 >= 0 && column - 1 >= 0 && board_state[row - 1][column - 1] == 0
           possible_moves << [row - 1, column - 1]
@@ -132,11 +133,11 @@ class GamesController < ApplicationController
           possible_moves << [row - 2, column + 2]
         end
         if possible_moves == []
-          render json: { error: 'There are no possible moves for this piece' }, status: :bad_request
+          render json: { message: 'There are no possible moves for this piece' }, status: :ok
         else
-          render json: { tile_requested: [row, column], possible_moves: possible_moves }
+          render json: { tile_requested: [row, column], possible_moves: possible_moves }, status: :ok
         end
-      # Player_2 rules
+      # Check if the piece belongs to the player and if there are possible moves for player 2
       elsif @game.token_2 == token && selected_tile == -1
         if row + 1 <= 7 && column - 1 >= 0 && board_state[row + 1][column - 1] == 0
           possible_moves << [row + 1, column - 1]
@@ -151,9 +152,9 @@ class GamesController < ApplicationController
           possible_moves << [row + 2, column + 2]
         end
         if possible_moves == []
-          render json: { error: 'There are no possible moves for this piece' }, status: :bad_request
+          render json: { message: 'There are no possible moves for this piece' }, status: :ok
         else
-          render json: { tile_requested: [row, column], possible_moves: possible_moves }
+          render json: { tile_requested: [row, column], possible_moves: possible_moves }, status: :ok
         end
       end
     end
@@ -190,11 +191,6 @@ class GamesController < ApplicationController
 
     row = params[:row].to_i
     column = params[:column].to_i
-    new_row = params[:new_row].to_i
-    new_column = params[:new_column].to_i
-    board_state = JSON.parse(@game.board_state)
-    original_tile = board_state[row][column]
-    new_tile = board_state[new_row][new_column]
 
     # Check if the original tile exists
     unless row.between?(0, 7) && column.between?(0, 7)
@@ -202,11 +198,18 @@ class GamesController < ApplicationController
       return
     end
 
+    new_row = params[:new_row].to_i
+    new_column = params[:new_column].to_i
+
     # Check if the new tile exists
     unless new_row.between?(0, 7) && new_column.between?(0, 7)
       render json: { error: 'New tile does not exist' }, status: :bad_request
       return
     end
+
+    board_state = JSON.parse(@game.board_state)
+    original_tile = board_state[row][column]
+    new_tile = board_state[new_row][new_column]
 
     # Check if it is the player's turn
     if (token == @game.token_1 && @game.game_status == 'Player_2 turn') || (token == @game.token_2 && @game.game_status == 'Player_1 turn')
