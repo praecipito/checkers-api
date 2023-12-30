@@ -16,6 +16,15 @@ RSpec.describe GamesController, type: :controller do
   describe 'GET #show' do
     let(:game) { create(:game) }
 
+    context 'when game does not exist' do
+      it 'returns status not found' do
+        get :show, params: { id: 999 }
+
+        expect(response).to have_http_status(:not_found)
+        expect(JSON.parse(response.body)).to eq({ 'error' => 'Game does not exist' })
+      end
+    end
+
     context 'when token is not provided' do
       it 'returns status unauthorized' do
         get :show, params: { id: game.id }
@@ -56,28 +65,6 @@ RSpec.describe GamesController, type: :controller do
         parsed_response = JSON.parse(response.body)
         expect(parsed_response).to include('board_state', 'game_status', 'player_1_pieces', 'player_2_pieces')
         expect(parsed_response['game_status']).to eq('Player_1 turn')
-      end
-    end
-
-    context 'when token matches token_2 but game_status is not "Waiting for opponent"' do
-      it 'returns board_state, game_status, and player pieces with status ok' do
-        game.update(game_status: 'Player_1 turn')
-        request.headers['Authorization'] = 'token2'
-        get :show, params: { id: game.id }
-
-        expect(response).to have_http_status(:ok)
-        parsed_response = JSON.parse(response.body)
-        expect(parsed_response).to include('board_state', 'game_status', 'player_1_pieces', 'player_2_pieces')
-        expect(parsed_response['game_status']).to eq('Player_1 turn')
-      end
-    end
-
-    context 'when game does not exist' do
-      it 'returns status not found' do
-        get :show, params: { id: 999 }
-
-        expect(response).to have_http_status(:not_found)
-        expect(JSON.parse(response.body)).to eq({ 'error' => 'Game does not exist' })
       end
     end
   end

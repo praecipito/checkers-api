@@ -1,36 +1,14 @@
 class GamesController < ApplicationController
+  before_action :set_game, only: [:show, :movements, :move]
+
   def create
-    # Generate random tokens
-    token_1 = SecureRandom.hex(10)
-    token_2 = SecureRandom.hex(10)
-
-    # Create initial board state (8x8 checkers board)
-    initial_board_state = [
-      [-1, 0, -1, 0, -1, 0, -1, 0],
-      [0, -1, 0, -1, 0, -1, 0, -1],
-      [-1, 0, -1, 0, -1, 0, -1, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0],
-      [0, 1, 0, 1, 0, 1, 0, 1]
-    ]
-
-    # Create a new game instance with tokens and initial board state
-    @game = Game.create!(
-      token_1: token_1,
-      token_2: token_2,
-      board_state: initial_board_state,
-      player_1_pieces: 12,
-      player_2_pieces: 12
-    )
+    # Create a new default game
+    @game = Game.create!
 
     render json: { game_id: @game.id, token_1: @game.token_1, token_2: @game.token_2 }, status: :created
   end
 
   def show
-    @game = Game.find_by(id: params[:id])
-
     # Check if the game exists
     unless @game
       render json: { error: 'Game does not exist' }, status: :not_found
@@ -67,8 +45,6 @@ class GamesController < ApplicationController
   end
 
   def movements
-    @game = Game.find_by(id: params[:id])
-
     # Check if the game exists
     unless @game
       render json: { error: 'Game does not exist' }, status: :not_found
@@ -193,8 +169,6 @@ class GamesController < ApplicationController
   end
 
   def move
-    @game = Game.find_by(id: params[:id])
-
     # Check if the game exists
     unless @game
       render json: { error: 'Game does not exist' }, status: :not_found
@@ -376,5 +350,11 @@ class GamesController < ApplicationController
         render json: { board_state: @game.board_state, game_status: @game.game_status, player_1_pieces: @game.player_1_pieces, player_2_pieces: @game.player_2_pieces }, status: :ok
       end
     end
+  end
+
+  private
+
+  def set_game
+    @game = Game.find_by(id: params[:id])
   end
 end
