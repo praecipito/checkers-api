@@ -12,14 +12,14 @@
 
 ActiveRecord::Schema[7.0].define(version: 2023_12_28_144142) do
   create_table "games", force: :cascade do |t|
-    t.text "board_state"
+    t.text "board_state", default: "[[-1, 0, -1, 0, -1, 0, -1, 0],[0, -1, 0, -1, 0, -1, 0, -1],[-1, 0, -1, 0, -1, 0, -1, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0],[0, 1, 0, 1, 0, 1, 0, 1],[1, 0, 1, 0, 1, 0, 1, 0],[0, 1, 0, 1, 0, 1, 0, 1]]"
     t.string "game_status", default: "Waiting for opponent"
-    t.string "token_1"
-    t.string "token_2"
+    t.string "token_1", default: "1cf36371e371dc5e1fd8"
+    t.string "token_2", default: "3b5c4aa14ff6c3d7dd59"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "player_1_pieces"
-    t.integer "player_2_pieces"
+    t.integer "player_1_pieces", default: 12
+    t.integer "player_2_pieces", default: 12
   end
 
 end
