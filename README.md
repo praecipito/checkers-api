@@ -25,7 +25,7 @@ This is a simple JSON REST API for playing checkers using Ruby on Rails 7.0.8 an
   rails server
   ```
 
-  - **Run Tests:**
+- **Run Tests:**
   ```
   bundle exec rspec
   ```
