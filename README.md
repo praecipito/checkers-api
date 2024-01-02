@@ -25,6 +25,11 @@ This is a simple JSON REST API for playing checkers using Ruby on Rails 7.0.8 an
   rails server
   ```
 
+  - **Run Tests:**
+  ```
+  bundle exec rspec
+  ```
+
 ## Endpoints
 
 1. **Create a New Game**
@@ -39,7 +44,7 @@ This is a simple JSON REST API for playing checkers using Ruby on Rails 7.0.8 an
    - **Parameters:**
      - `id`: Game ID
      - *Authorization Header:* Token (`token_1` for player_1 or `token_2` for player_2)
-   - **Response:** Returns `board_state` and `game_status` for the specified game.
+   - **Response:** Returns `board_state`, `game_status`, `player_1_pieces` and `player_2_pieces` for the specified game.
 
 3. **Show Possible Piece Movements**
    - **Endpoint:** `GET /games/:id/movements/:row/:column`
@@ -52,10 +57,10 @@ This is a simple JSON REST API for playing checkers using Ruby on Rails 7.0.8 an
 
 4. **Update Board Moving A Piece**
    - **Endpoint:** `PATCH /games/:id/move/:row/:column/to/:new_row/:new_column`
-   - **Description:** Moves a piece on the board.
+   - **Description:** Moves a piece on the board, update player's pieces when the opponent ate their piece and changes game_status.
    - **Parameters:**
      - `id`: Game ID
      - `row`, `column`: Initial position of the piece
      - `new_row`, `new_column`: New position for the piece
      - *Authorization Header:* Token (`token_1` for player_1 or `token_2` for player_2)
-   - **Response:** Provides details about the requested move.
+   - **Response:** Returns `board_state`, `game_status`, `player_1_pieces` and `player_2_pieces` for the specified game.
