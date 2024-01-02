@@ -1,36 +1,21 @@
 class GamesController < ApplicationController
   before_action :set_game, only: [:show, :movements, :move]
+  before_action :validations, only: [:show, :movements, :move]
 
   def create
     # Create a new default game
-    @game = Game.create!
+    @game = Game.create!(token_1: SecureRandom.hex(10), token_2: SecureRandom.hex(10))
 
-    render json: { game_id: @game.id, token_1: @game.token_1, token_2: @game.token_2 }, status: :created
+    if @game
+      render json: { game_id: @game.id, token_1: @game.token_1, token_2: @game.token_2 }, status: :created
+    else
+      render json: { error: 'Game could not be created' }, status: :bad_request
+    end
   end
 
   def show
-    # Check if the game exists
-    unless @game
-      render json: { error: 'Game does not exist' }, status: :not_found
-      return
-    end
-
-    token = request.headers['Authorization']
-
-    # Check if the token was provided
-    unless token
-      render json: { error: 'Token was not provided' }, status: :unauthorized
-      return
-    end
-
-    # Check if the provided token matches token_1 or token_2
-    unless [@game.token_1, @game.token_2].include?(token)
-      render json: { error: 'Wrong token' }, status: :unauthorized
-      return
-    end
-
     # If the token matches token_1, return board_state and game_status
-    case token
+    case @token
     when @game.token_1
       render json: { board_state: @game.board_state, game_status: @game.game_status, player_1_pieces: @game.player_1_pieces, player_2_pieces: @game.player_2_pieces }, status: :ok
       return
@@ -45,26 +30,6 @@ class GamesController < ApplicationController
   end
 
   def movements
-    # Check if the game exists
-    unless @game
-      render json: { error: 'Game does not exist' }, status: :not_found
-      return
-    end
-
-    token = request.headers['Authorization']
-
-    # Check if the token was provided
-    unless token
-      render json: { error: 'Token was not provided' }, status: :unauthorized
-      return
-    end
-
-    # Check if the provided token matches token_1 or token_2
-    unless [@game.token_1, @game.token_2].include?(token)
-      render json: { error: 'Wrong token' }, status: :unauthorized
-      return
-    end
-
     # Check if the game is in progress
     unless @game.game_status == 'Player_1 turn' || @game.game_status == 'Player_2 turn'
       render json: { error: 'Game is not in progress' }, status: :bad_request
@@ -81,114 +46,94 @@ class GamesController < ApplicationController
     end
 
     board_state = JSON.parse(@game.board_state)
-    possible_moves = []
+    possible_movements = []
     selected_tile = board_state[row][column]
 
     # Check if it is the player's turn
-    if (token == @game.token_1 && @game.game_status == 'Player_2 turn') || (token == @game.token_2 && @game.game_status == 'Player_1 turn')
+    if (@token == @game.token_1 && @game.game_status == 'Player_2 turn') || (@token == @game.token_2 && @game.game_status == 'Player_1 turn')
       render json: { error: 'Not your turn' }, status: :bad_request
-    elsif (token == @game.token_1 && @game.game_status == 'Player_1 turn') || (token == @game.token_2 && @game.game_status == 'Player_2 turn')
+    elsif (@token == @game.token_1 && @game.game_status == 'Player_1 turn') || (@token == @game.token_2 && @game.game_status == 'Player_2 turn')
       # Check if the selected tile is empty
       if selected_tile == 0
         render json: { error: 'Empty tile selected' }, status: :bad_request
       # Check if the piece belongs to the player
-      elsif (@game.token_1 == token && (selected_tile == -1 || selected_tile == -11)) || (@game.token_2 == token && (selected_tile == 1 || selected_tile == 11))
+      elsif (@game.token_1 == @token && (selected_tile == -1 || selected_tile == -11)) || (@game.token_2 == @token && (selected_tile == 1 || selected_tile == 11))
         render json: { error: "Opponent's piece selected" }, status: :bad_request
-      # Check if the piece belongs to the player and if there are possible moves for player 1
-      elsif @game.token_1 == token && (selected_tile == 1 || selected_tile == 11)
-        # If the piece is a king or not, check if there are possible moves for player 1
+      # Check if the piece belongs to the player and if there are possible movements for player 1
+      elsif @game.token_1 == @token && (selected_tile == 1 || selected_tile == 11)
+        # If the piece is a king or not, check if there are possible movements for player 1
         if row - 1 >= 0 && column - 1 >= 0 && board_state[row - 1][column - 1] == 0
-          possible_moves << [row - 1, column - 1]
+          possible_movements << [row - 1, column - 1]
         end
         if row - 1 >= 0 && column + 1 <= 7 && board_state[row - 1][column + 1] == 0
-          possible_moves << [row - 1, column + 1]
+          possible_movements << [row - 1, column + 1]
         end
         if row - 2 >= 0 && column - 2 >= 0 && (board_state[row - 1][column - 1] == -1 || board_state[row - 1][column - 1] == -11) && board_state[row - 2][column - 2] == 0
-          possible_moves << [row - 2, column - 2]
+          possible_movements << [row - 2, column - 2]
         end
         if row - 2 >= 0 && column + 2 <= 7 && (board_state[row - 1][column + 1] == -1 || board_state[row - 1][column + 1] == -11) && board_state[row - 2][column + 2] == 0
-          possible_moves << [row - 2, column + 2]
+          possible_movements << [row - 2, column + 2]
         end
-        # If the piece is a king, check if there are possible moves for player 1
+        # If the piece is a king, check if there are possible movements for player 1
         if selected_tile == 11
           if row + 1 <= 7 && column - 1 >= 0 && board_state[row + 1][column - 1] == 0
-            possible_moves << [row + 1, column - 1]
+            possible_movements << [row + 1, column - 1]
           end
           if row + 1 <= 7 && column + 1 <= 7 && board_state[row + 1][column + 1] == 0
-            possible_moves << [row + 1, column + 1]
+            possible_movements << [row + 1, column + 1]
           end
           if row + 2 <= 7 && column - 2 >= 0 && (board_state[row + 1][column - 1] == -1 || board_state[row + 1][column - 1] == -11) && board_state[row + 2][column - 2] == 0
-            possible_moves << [row + 2, column - 2]
+            possible_movements << [row + 2, column - 2]
           end
           if row + 2 <= 7 && column + 2 <= 7 && (board_state[row + 1][column + 1] == -1 || board_state[row + 1][column + 1] == -11) && board_state[row + 2][column + 2] == 0
-            possible_moves << [row + 2, column + 2]
+            possible_movements << [row + 2, column + 2]
           end
         end
-        if possible_moves == []
-          render json: { message: 'There are no possible moves for this piece' }, status: :ok
+        if possible_movements == []
+          render json: { error: 'There are no possible movements for this piece' }, status: :bad_request
         else
-          render json: { tile_requested: [row, column], possible_moves: possible_moves }, status: :ok
+          render json: { tile_requested: [row, column], possible_movements: possible_movements }, status: :ok
         end
-      # Check if the piece belongs to the player and if there are possible moves for player 2
-      elsif @game.token_2 == token && (selected_tile == -1 || selected_tile == -11)
-        # If the piece is a king, check if there are possible moves for player 2
+      # Check if the piece belongs to the player and if there are possible movements for player 2
+      elsif @game.token_2 == @token && (selected_tile == -1 || selected_tile == -11)
+        # If the piece is a king, check if there are possible movements for player 2
         if selected_tile == -11
           if row - 1 >= 0 && column - 1 >= 0 && board_state[row - 1][column - 1] == 0
-            possible_moves << [row - 1, column - 1]
+            possible_movements << [row - 1, column - 1]
           end
           if row - 1 >= 0 && column + 1 <= 7 && board_state[row - 1][column + 1] == 0
-            possible_moves << [row - 1, column + 1]
+            possible_movements << [row - 1, column + 1]
           end
           if row - 2 >= 0 && column - 2 >= 0 && (board_state[row - 1][column - 1] == 1 || board_state[row - 1][column - 1] == 11) && board_state[row - 2][column - 2] == 0
-            possible_moves << [row - 2, column - 2]
+            possible_movements << [row - 2, column - 2]
           end
           if row - 2 >= 0 && column + 2 <= 7 && (board_state[row - 1][column + 1] == 1 || board_state[row - 1][column + 1] == 11) && board_state[row - 2][column + 2] == 0
-            possible_moves << [row - 2, column + 2]
+            possible_movements << [row - 2, column + 2]
           end
         end
-        # If the piece is a king or not, check if there are possible moves for player 2
+        # If the piece is a king or not, check if there are possible movements for player 2
         if row + 1 <= 7 && column - 1 >= 0 && board_state[row + 1][column - 1] == 0
-          possible_moves << [row + 1, column - 1]
+          possible_movements << [row + 1, column - 1]
         end
         if row + 1 <= 7 && column + 1 <= 7 && board_state[row + 1][column + 1] == 0
-          possible_moves << [row + 1, column + 1]
+          possible_movements << [row + 1, column + 1]
         end
         if row + 2 <= 7 && column - 2 >= 0 && (board_state[row + 1][column - 1] == 1 || board_state[row + 1][column - 1] == 11) && board_state[row + 2][column - 2] == 0
-          possible_moves << [row + 2, column - 2]
+          possible_movements << [row + 2, column - 2]
         end
         if row + 2 <= 7 && column + 2 <= 7 && (board_state[row + 1][column + 1] == 1 || board_state[row + 1][column + 1] == 11) && board_state[row + 2][column + 2] == 0
-          possible_moves << [row + 2, column + 2]
+          possible_movements << [row + 2, column + 2]
         end
-        if possible_moves == []
-          render json: { message: 'There are no possible moves for this piece' }, status: :ok
+        if possible_movements == []
+          render json: { message: 'There are no possible movements for this piece' }, status: :ok
         else
-          render json: { tile_requested: [row, column], possible_moves: possible_moves }, status: :ok
+          render json: { tile_requested: [row, column], possible_movements: possible_movements }, status: :ok
         end
       end
     end
   end
 
   def move
-    # Check if the game exists
-    unless @game
-      render json: { error: 'Game does not exist' }, status: :not_found
-      return
-    end
-
-    token = request.headers['Authorization']
-
-    # Check if the token was provided
-    unless token
-      render json: { error: 'Token was not provided' }, status: :unauthorized
-      return
-    end
-
-    # Check if the provided token matches token_1 or token_2
-    unless [@game.token_1, @game.token_2].include?(token)
-      render json: { error: 'Wrong token' }, status: :unauthorized
-      return
-    end
-
     # Check if the game is in progress
     unless @game.game_status == 'Player_1 turn' || @game.game_status == 'Player_2 turn'
       render json: { error: 'Game is not in progress' }, status: :bad_request
@@ -218,24 +163,24 @@ class GamesController < ApplicationController
     new_tile = board_state[new_row][new_column]
 
     # Check if it is the player's turn
-    if (token == @game.token_1 && @game.game_status == 'Player_2 turn') || (token == @game.token_2 && @game.game_status == 'Player_1 turn')
+    if (@token == @game.token_1 && @game.game_status == 'Player_2 turn') || (@token == @game.token_2 && @game.game_status == 'Player_1 turn')
       render json: { error: 'Not your turn' }, status: :bad_request
       return
-    elsif (token == @game.token_1 && @game.game_status == 'Player_1 turn') || (token == @game.token_2 && @game.game_status == 'Player_2 turn')
+    elsif (@token == @game.token_1 && @game.game_status == 'Player_1 turn') || (@token == @game.token_2 && @game.game_status == 'Player_2 turn')
       # Check if the original tile is empty
       if original_tile == 0
-        render json: { error: 'Original tile empty' }, status: :bad_request
+        render json: { error: 'Original tile is empty' }, status: :bad_request
         return
       # Check if the piece belongs to the player
-      elsif (@game.token_1 == token && (original_tile == -1 || original_tile == -11)) || (@game.token_2 == token && (original_tile == 1 || original_tile == 11))
+      elsif (@game.token_1 == @token && (original_tile == -1 || original_tile == -11)) || (@game.token_2 == @token && (original_tile == 1 || original_tile == 11))
         render json: { error: "The original tile is occupied by your opponent's piece" }, status: :bad_request
         return
       # Check if the new tile is occupied by your own piece
-      elsif (@game.token_1 == token && (new_tile == 1 || new_tile == 11)) || (@game.token_2 == token && (new_tile == -1 || new_tile == -11))
-        render json: { error: 'The new tile is occupied by own piece' }, status: :bad_request
+      elsif (@game.token_1 == @token && (new_tile == 1 || new_tile == 11)) || (@game.token_2 == @token && (new_tile == -1 || new_tile == -11))
+        render json: { error: 'The new tile is occupied by one of your pieces' }, status: :bad_request
         return
       # Player_1 rules
-      elsif @game.token_1 == token && (original_tile == 1 || original_tile == 11)
+      elsif @game.token_1 == @token && (original_tile == 1 || original_tile == 11)
         if new_row == row - 1 && (new_column == column - 1 || new_column == column + 1) && new_tile == 0
           board_state[row][column] = 0
           if original_tile == 11 || new_row == 0
@@ -292,7 +237,7 @@ class GamesController < ApplicationController
         end
         render json: { board_state: @game.board_state, game_status: @game.game_status, player_1_pieces: @game.player_1_pieces, player_2_pieces: @game.player_2_pieces }
       # Player_2 rules
-      elsif @game.token_2 == token && (original_tile == -1 || original_tile == -11)
+      elsif @game.token_2 == @token && (original_tile == -1 || original_tile == -11)
         if new_row == row + 1 && (new_column == column - 1 || new_column == column + 1) && new_tile == 0
           board_state[row][column] = 0
           if original_tile == -11 || new_row == 7
@@ -356,5 +301,27 @@ class GamesController < ApplicationController
 
   def set_game
     @game = Game.find_by(id: params[:id])
+  end
+
+  def validations
+    # Check if the game exists
+    unless @game
+      render json: { error: 'Game does not exist' }, status: :not_found
+      return
+    end
+
+    @token = request.headers['Authorization']
+
+    # Check if the token was provided
+    unless @token
+      render json: { error: 'Token was not provided' }, status: :unauthorized
+      return
+    end
+
+    # Check if the provided token matches token_1 or token_2
+    unless [@game.token_1, @game.token_2].include?(@token)
+      render json: { error: 'Wrong token' }, status: :unauthorized
+      return
+    end
   end
 end
